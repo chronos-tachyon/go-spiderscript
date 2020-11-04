@@ -1,0 +1,300 @@
+Registers:
+  Register reference codes are 8 bits.
+  The registers themselves are generally 64 bits.
+
+  0x xxx xxx    %r0 .. %r127  general purpose registers
+
+  10 000 000    %ip           instruction pointer (.text)
+  10 000 001    %dp           data pointer (.data + .bss)
+  10 000 010    %sp           stack pointer
+  10 000 011    %bp           base pointer
+  10 000 100    ?             ~reserved~
+  10 000 101    ?             ~reserved~
+  10 000 110    ?             ~reserved~
+  10 000 111    ?             ~reserved~
+
+  10 001 000    %fz           zero flag, ZF
+  10 001 001    %fc           carry flag, CF (unsigned overflow)
+  10 001 010    %fs           sign flag, SF
+  10 001 011    %fo           overflow flag, OF (signed overflow)
+  10 001 100    ?             ~reserved~
+  10 001 101    ?             ~reserved~
+  10 001 110    ?             ~reserved~
+  10 001 111    ?             ~reserved~
+
+  10 01x xxx    ?             ~reserved~
+  10 1xx xxx    ?             ~reserved~
+
+  11 000 000    %z0           const register, uint64(  0)
+  11 000 001    %p1           const register, uint64( +1)
+  11 000 010    %p2           const register, uint64( +2)
+  11 000 011    %p3           const register, uint64( +3)
+  11 000 100    %p4           const register, uint64( +4)
+  11 000 101    %p5           const register, uint64( +5)
+  11 000 110    %p6           const register, uint64( +6)
+  11 000 111    %p7           const register, uint64( +7)
+                                                         
+  11 001 000    %p8           const register, uint64( +8)
+  11 001 001    %p9           const register, uint64( +9)
+  11 001 010    %p10          const register, uint64(+10)
+  11 001 011    %p11          const register, uint64(+11)
+  11 001 100    %p12          const register, uint64(+12)
+  11 001 101    %p13          const register, uint64(+13)
+  11 001 110    %p14          const register, uint64(+14)
+  11 001 111    %p15          const register, uint64(+15)
+
+  11 010 000    %p16          const register, uint64(+16)
+  11 010 001    %p17          const register, uint64(+17)
+  11 010 010    %p18          const register, uint64(+18)
+  11 010 011    %p19          const register, uint64(+19)
+  11 010 100    %p20          const register, uint64(+20)
+  11 010 101    %p21          const register, uint64(+21)
+  11 010 110    %p22          const register, uint64(+22)
+  11 010 111    %p23          const register, uint64(+23)
+
+  11 011 000    %p24          const register, uint64(+24)
+  11 011 001    %p25          const register, uint64(+25)
+  11 011 010    %p26          const register, uint64(+26)
+  11 011 011    %p27          const register, uint64(+27)
+  11 011 100    %p28          const register, uint64(+28)
+  11 011 101    %p29          const register, uint64(+29)
+  11 011 110    %p30          const register, uint64(+30)
+  11 011 111    %p31          const register, uint64(+31)
+
+  11 100 000    %n32          const register, uint64(-32)
+  11 100 001    %n31          const register, uint64(-31)
+  11 100 010    %n30          const register, uint64(-30)
+  11 100 011    %n29          const register, uint64(-29)
+  11 100 100    %n28          const register, uint64(-28)
+  11 100 101    %n27          const register, uint64(-27)
+  11 100 110    %n26          const register, uint64(-26)
+  11 100 111    %n25          const register, uint64(-25)
+
+  11 101 000    %n24          const register, uint64(-24)
+  11 101 001    %n23          const register, uint64(-23)
+  11 101 010    %n22          const register, uint64(-22)
+  11 101 011    %n21          const register, uint64(-21)
+  11 101 100    %n20          const register, uint64(-20)
+  11 101 101    %n19          const register, uint64(-19)
+  11 101 110    %n18          const register, uint64(-18)
+  11 101 111    %n17          const register, uint64(-17)
+
+  11 110 000    %n16          const register, uint64(-16)
+  11 110 001    %n15          const register, uint64(-15)
+  11 110 010    %n14          const register, uint64(-14)
+  11 110 011    %n13          const register, uint64(-13)
+  11 110 100    %n12          const register, uint64(-12)
+  11 110 101    %n11          const register, uint64(-11)
+  11 110 110    %n10          const register, uint64(-10)
+  11 110 111    %n9           const register, uint64( -9)
+
+  11 111 000    %n8           const register, uint64( -8)
+  11 111 001    %n7           const register, uint64( -7)
+  11 111 010    %n6           const register, uint64( -6)
+  11 111 011    %n5           const register, uint64( -5)
+  11 111 100    %n4           const register, uint64( -4)
+  11 111 101    %n3           const register, uint64( -3)
+  11 111 110    %n2           const register, uint64( -2)
+  11 111 111    %n1           const register, uint64( -1)
+
+Instructions:
+
+   33 22 2222 2222 11 11 1111 1100 00 00 0000
+   10 98 7654 3210 98 76 5432 1098 76 54 3210
+  +--+-------+-------+-------+-------+-------+
+  |  |       |       |       |       |       |
+  |AA|BB BBBB|CCCC CC|DD DDDD|EEEE EE|FF FFFF|
+  |  |       |       |       |       |       |
+  +--+-------+-------+-------+-------+-------+
+
+  AA     <-- number of additional 32-bit words {0, 1, 2, 3}
+  BBBBBB <-- opcode
+  CCCCCC <-- destination register
+  DDDDDD
+  EEEEEE
+  FFFFFF
+
+  call
+  enter
+  leave
+  ret
+  jump
+  inot
+  ior
+  iand
+  ixor
+  ineg
+  iadd
+  iaddc
+  isub
+  isubc
+  imul.s
+  imul.u
+  imulw.s
+  imulw.u
+  idiv.s
+  idiv.u
+  idivw.s
+  idivw.u
+  xinot
+  xior
+  xiand
+  xixor
+  xineg
+  xiadd
+  xiaddc
+  xisub
+  xisubc
+  ximul.s
+  ximul.u
+  ximulw.s
+  ximulw.u
+  xidiv.s
+  xidiv.u
+  xidivw.s
+  xidivw.u
+  fneg
+  fadd
+  fsub
+  fmul
+  fdiv
+  signextend.s8
+  signextend.s16
+  signextend.s32
+  loadaddr
+  loadimm.i18
+  loadimm.i32
+  loadimm.i64
+  loadimm.f18
+  loadimm.f32
+  loadimm.f64
+  load.i8
+  load.i16
+  load.i32
+  load.i64
+  load.f16
+  load.f32
+  load.f64
+  store.i8
+  store.i16
+  store.i32
+  store.i64
+
+  noop                            xx xx xx xx                                     do nothing
+  bkpt                            xx xx xx xx                                     debug breakpoint
+
+  enter imm8                      xx xxx xxx  II III III                          %sp -= 8; *%sp = %bp; %bp = %sp; %sp -= imm8
+  enter imm16                     xx xxx xxx  II III III  II III III              %sp -= 8; *%sp = %bp; %bp = %sp; %sp -= imm16
+  leave                           xx xxx xxx                                      %sp = %bp; %bp = *%sp; %sp += 8
+
+  push %RA                        xx xxx xxx  AA AAA AAA                          %sp -= 8; *%sp = %RA
+  pop %RA                         xx xxx xxx  AA AAA AAA                          %RA = *%sp; %sp += 8
+
+  jump %RA                        xx xxx xxx  AA AAA AAA                          %ip = %RA
+  call %RA                        xx xxx xxx  AA AAA AAA                          %sp -= 8; *%sp = %ip; %ip = %RA
+  ret                             xx xxx xxx                                      %ip = *%sp; %sp += 8
+
+  jumpc.z %RA                     xx xxx xxx  AA AAA AAA                          if (ZF) %ip = %RA
+  jumpc.nz %RA                    xx xxx xxx  AA AAA AAA                          if (!ZF) %ip = %RA
+  jumpc.c %RA                     xx xxx xxx  AA AAA AAA                          if (CF) %ip = %RA
+  jumpc.nc %RA                    xx xxx xxx  AA AAA AAA                          if (!CF) %ip = %RA
+  jumpc.o %RA                     xx xxx xxx  AA AAA AAA                          if (OF) %ip = %RA
+  jumpc.no %RA                    xx xxx xxx  AA AAA AAA                          if (!OF) %ip = %RA
+  jumpc.a %RA                     xx xxx xxx  AA AAA AAA                          if (!ZF && !CF) %ip = %RA
+  jumpc.na %RA                    xx xxx xxx  AA AAA AAA                          if (ZF || CF) %ip = %RA
+  jumpc.l %RA                     xx xxx xxx  AA AAA AAA                          if (SF != OF) %ip = %RA
+  jumpc.nl %RA                    xx xxx xxx  AA AAA AAA                          if (SF == OF) %ip = %RA
+  jumpc.g %RA                     xx xxx xxx  AA AAA AAA                          if (!ZF && SF == OF) %ip = %RA
+  jumpc.ng %RA                    xx xxx xxx  AA AAA AAA                          if (ZF || SF != OF) %ip = %RA
+
+  copy %RA, %RB                   xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA = %RB
+  swap %RA, %RB                   xx xxx xxx  AA AAA AAA  BB BBB BBB              (%RA, %RB) = (%RB, %RA)
+
+  copyc.z %RA, %RB                xx xxx xxx  AA AAA AAA  BB BBB BBB              if (ZF) %RA = %RB
+  copyc.nz %RA, %RB               xx xxx xxx  AA AAA AAA  BB BBB BBB              if (!ZF) %RA = %RB
+  copyc.c %RA, %RB                xx xxx xxx  AA AAA AAA  BB BBB BBB              if (CF) %RA = %RB
+  copyc.nc %RA, %RB               xx xxx xxx  AA AAA AAA  BB BBB BBB              if (!CF) %RA = %RB
+  copyc.o %RA, %RB                xx xxx xxx  AA AAA AAA  BB BBB BBB              if (OF) %RA = %RB
+  copyc.no %RA, %RB               xx xxx xxx  AA AAA AAA  BB BBB BBB              if (!OF) %RA = %RB
+  copyc.a %RA, %RB                xx xxx xxx  AA AAA AAA  BB BBB BBB              if (!ZF && !CF) %RA = %RB
+  copyc.na %RA, %RB               xx xxx xxx  AA AAA AAA  BB BBB BBB              if (ZF || CF) %RA = %RB
+  copyc.l %RA, %RB                xx xxx xxx  AA AAA AAA  BB BBB BBB              if (SF != OF) %RA = %RB
+  copyc.nl %RA, %RB               xx xxx xxx  AA AAA AAA  BB BBB BBB              if (SF == OF) %RA = %RB
+  copyc.g %RA, %RB                xx xxx xxx  AA AAA AAA  BB BBB BBB              if (!ZF && SF == OF) %RA = %RB
+  copyc.ng %RA, %RB               xx xxx xxx  AA AAA AAA  BB BBB BBB              if (!ZF && SF != OF) %RA = %RB
+
+  not %RA                         xx xxx xxx  AA AAA AAA                          %RA = ~%RA
+  neg %RA                         xx xxx xxx  AA AAA AAA                          %RA = -%RA
+  inc %RA                         xx xxx xxx  AA AAA AAA                          %RA += 1
+  dec %RA                         xx xxx xxx  AA AAA AAA                          %RA -= 1
+  test %RA, %RB                   xx xxx xxx  AA AAA AAA  BB BBB BBB              (void)(%RA & %RB)
+  and %RA, %RB                    xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA &= %RB
+  or %RA, %RB                     xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA |= %RB
+  xor %RA, %RB                    xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA ^= %RB
+  shl %RA, %RB                    xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA <<= %RB
+  shr %RA, %RB                    xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA >>= %RB
+  rol %RA, %RB                    xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA = (%RA << %RB) | (%RA >> (64 - %RB))
+  ror %RA, %RB                    xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA = (%RA >> %RB) | (%RA << (64 - %RB))
+  add %RA, %RB                    xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA += %RB
+  addc %RA, %RB                   xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA += %RB + CF
+  cmp %RA, %RB                    xx xxx xxx  AA AAA AAA  BB BBB BBB              (void)(%RA - %RB)
+  sub %RA, %RB                    xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA -= %RB
+  subc %RA, %RB                   xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA -= %RB + CF
+  mul %RA, %RB                    xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA *= %RB [unsigned]
+  muls %RA, %RB                   xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA *= %RB [signed]
+  mulw %RA, %RB, %RC              xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  %RA:%RB = %RB * %RC [unsigned]
+  mulws %RA, %RB, %RC             xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  %RA:%RB = %RB * %RC [signed]
+  div %RA, %RB                    xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA /= %RB [unsigned]
+  divs %RA, %RB                   xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA /= %RB [signed]
+  divmod %RA, %RB, %RC            xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  %RA = %RB mod %RC; %RB /= %RC [unsigned]
+  divmods %RA, %RB, %RC           xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  %RA = %RB mod %RC; %RB /= %RC [signed]
+
+  fma %RA, %RB, 1                 xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA += (%RB << 0) [unsigned]
+  fma %RA, %RB, 2                 xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA += (%RB << 1) [unsigned]
+  fma %RA, %RB, 4                 xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA += (%RB << 2) [unsigned]
+  fma %RA, %RB, 8                 xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA += (%RB << 3) [unsigned]
+  fma %RA, %RB, 16                xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA += (%RB << 4) [unsigned]
+  fma %RA, %RB, 32                xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA += (%RB << 5) [unsigned]
+  fma %RA, %RB, 64                xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA += (%RB << 6) [unsigned]
+  fma %RA, %RB, %RC               xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  %RA += (%RB * %RC) [unsigned]
+  fmas %RA, %RB, %RC              xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  %RA += (%RB * %RC) [signed]
+
+  load.b %RA, imm8                xx xxx xxx  AA AAA AAA  <1 byte immediate>      %RA = imm8, zero extended
+  load.w %RA, imm16               xx xxx xxx  AA AAA AAA  <2 byte immediate>      %RA = imm16, zero extended
+  load.d %RA, imm32               xx xxx xxx  AA AAA AAA  <4 byte immediate>      %RA = imm32, zero extended
+  load.q %RA, imm64               xx xxx xxx  AA AAA AAA  <8 byte immediate>      %RA = imm64
+  load.j %RA, imm24               xx xxx xxx  AA AAA AAA  <3 byte immediate>      %RA = imm24, zero extended
+  load.k %RA, imm48               xx xxx xxx  AA AAA AAA  <6 byte immediate>      %RA = imm48, zero extended
+
+  loads.b %RA, imm8               xx xxx xxx  AA AAA AAA  <1 byte immediate>      %RA = imm8, sign extended
+  loads.w %RA, imm16              xx xxx xxx  AA AAA AAA  <2 byte immediate>      %RA = imm16, sign extended
+  loads.d %RA, imm32              xx xxx xxx  AA AAA AAA  <4 byte immediate>      %RA = imm32, sign extended
+  loads.q %RA, imm64              xx xxx xxx  AA AAA AAA  <8 byte immediate>      %RA = imm64
+  loads.j %RA, imm24              xx xxx xxx  AA AAA AAA  <3 byte immediate>      %RA = imm24, sign extended
+  loads.k %RA, imm48              xx xxx xxx  AA AAA AAA  <6 byte immediate>      %RA = imm48, sign extended
+
+  load.b %RA, (%RB)               xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA = *(uint8 *)%RB, zero extended
+  load.w %RA, (%RB)               xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA = *(uint16*)%RB, zero extended
+  load.d %RA, (%RB)               xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA = *(uint32*)%RB, zero extended
+  load.q %RA, (%RB)               xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA = *(uint64*)%RB
+
+  loads.b %RA, (%RB)              xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA = *(uint8 *)%RB, sign extended
+  loads.w %RA, (%RB)              xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA = *(uint16*)%RB, sign extended
+  loads.d %RA, (%RB)              xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA = *(uint32*)%RB, sign extended
+  loads.q %RA, (%RB)              xx xxx xxx  AA AAA AAA  BB BBB BBB              %RA = *(uint64*)%RB
+
+  stor.b (%RA), %RB               xx xxx xxx  AA AAA AAA  BB BBB BBB              *(uint8 *)%RA = (%RB & 0xff)
+  stor.w (%RA), %RB               xx xxx xxx  AA AAA AAA  BB BBB BBB              *(uint16*)%RA = (%RB & 0xffff)
+  stor.d (%RA), %RB               xx xxx xxx  AA AAA AAA  BB BBB BBB              *(uint32*)%RA = (%RB & 0xffffffff)
+  stor.q (%RA), %RB               xx xxx xxx  AA AAA AAA  BB BBB BBB              *(uint64*)%RA = %RB
+
+  memset.b (%RA), %RB, %RC        xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  for (uint64 i = 0; i < %RC; i += 1) *(uint8 *)(%RA+i) = (%RB & 0xff)
+  memset.w (%RA), %RB, %RC        xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  for (uint64 i = 0; i < %RC; i += 2) *(uint16*)(%RA+i) = (%RB & 0xffff)
+  memset.d (%RA), %RB, %RC        xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  for (uint64 i = 0; i < %RC; i += 4) *(uint32*)(%RA+i) = (%RB & 0xffffffff)
+  memset.q (%RA), %RB, %RC        xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  for (uint64 i = 0; i < %RC; i += 8) *(uint64*)(%RA+i) = %RB
+
+  memcpy.b (%RA), (%RB), %RC      xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  for (uint64 i = 0; i < %RC; i += 1) *(uint8 *)(%RA+i) = *(uint8 *)(%RB+i)
+  memcpy.w (%RA), (%RB), %RC      xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  for (uint64 i = 0; i < %RC; i += 2) *(uint16*)(%RA+i) = *(uint16*)(%RB+i)
+  memcpy.d (%RA), (%RB), %RC      xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  for (uint64 i = 0; i < %RC; i += 4) *(uint32*)(%RA+i) = *(uint32*)(%RB+i)
+  memcpy.q (%RA), (%RB), %RC      xx xxx xxx  AA AAA AAA  BB BBB BBB  CC CCC CCC  for (uint64 i = 0; i < %RC; i += 8) *(uint64*)(%RA+i) = *(uint64*)(%RB+i)
+

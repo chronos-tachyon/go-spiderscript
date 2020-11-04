@@ -1,0 +1,98 @@
+Operators:
+  '!' '!='
+  '%' '%='
+  '&' '&=' '&&' '&&='
+  '('
+  ')'
+  '*' '*=' '**' '**='
+  '+' '+=' '++'
+  ','
+  '-' '-=' '--'
+  '.'
+  '/' '/=' '/%' '/*' '//'
+  ':' ':='
+  ';'
+  '<' '<=' '<=>' '<<' '<<=' '<<|' '<<|='
+  '=' '==' '=>'
+  '>' '>=' '>>' '>>=' '>>|' '>>|='
+  '?' '?:' '?='
+  '['
+  ']'
+  '^' '^=' '^^' '^^='
+  '{'
+  '|' '|=' '||' '||='
+  '}'
+  '~' '~~'
+
+Unary prefix:
+  '-'     negation
+  '!'     logical NOT
+  '~'     bitwise NOT
+
+Unary postfix:
+  '++'    increment in place
+  '--'    decrement in place
+  '~~'    bitwise NOT in place
+
+Binary infix:
+  '<=>'   compare to (returns enum[s8] { LT = -1, EQ = 0, GT = 1 })
+  '=='    equal to
+  '!='    not equal to
+  '<'     less than
+  '<='    less than or equal to
+  '>'     greater than
+  '>='    greater than or equal to
+  '?:'    leftmost non-zero value
+  '+'     addition
+  '-'     subtraction
+  '*'     multiplication
+  '/'     division
+  '%'     modulus
+  '/%'    divmod (returns 2-tuple containing division result and modulus result)
+  '**'    exponentiation
+  '<<'    shift left
+  '>>'    shift right
+  '<<|'   rotate left
+  '>>|'   rotate right
+  '&'     bitwise AND
+  '|'     bitwise OR
+  '^'     bitwise XOR
+  '&&'    logical AND
+  '||'    logical OR
+  '^^'    logical XOR
+
+Ternary:
+  '?' ':' conditional expression
+
+Assignment:
+  '='     assignment
+  '?='    assign rvalue if lvalue is zero
+  '+='    addition with assignment
+  '-='    subtraction with assignment
+  '*='    multiplication with assignment
+  '/='    division with assignment
+  '%='    modulus with assignment
+  '**='   exponentiation with assignment
+  '<<='   shift left with assignment
+  '>>='   shift right with assignment
+  '<<|='  rotate left with assignment
+  '>>|='  rotate right with assignment
+  '&='    bitwise AND with assignment
+  '|='    bitwise OR with assignment
+  '^='    bitwise XOR with assignment
+  '&&='   logical AND with assignment
+  '||='   logical OR with assignment
+  '^^='   logical XOR with assignment
+
+Other:
+  '/*'    introduce multi-line comment
+  '//'    introduce single-line comment
+  '()'    expression
+  '[]'    dereference
+  '{}'    not used
+  ';'     statement separator
+  ','     separate expressions
+  '.'     search
+  ':'     bind type to symbol
+  ':='    declare and assign
+  '=>'    lambda arrow

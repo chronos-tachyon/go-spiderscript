@@ -1,0 +1,48 @@
+123.456e+78                                         ~~~ RVALUE ONLY ~~~
+"abc"                                               ~~~ RVALUE ONLY ~~~
+x => x                                              ~~~ RVALUE ONLY ~~~
+(x, y) => x + y                                     ~~~ RVALUE ONLY ~~~
+(x: Int, y: Int): Int => x + y                      ~~~ RVALUE ONLY ~~~
+(x: Int, y: Int): Int => { return x + y }           ~~~ RVALUE ONLY ~~~
+Int...[1, 2, 3]                                     ~~~ RVALUE ONLY ~~~
+Struct{field: 42}                                   ~~~ RVALUE ONLY ~~~
+
+_                                                   ~~~ LVALUE ONLY ~~~
+
+(a, b)
+(a, _)                                              ~~~ LVALUE ONLY ~~~
+(a, 1)                                              ~~~ RVALUE ONLY ~~~
+
+symbol
+module::name::symbol
+symbol[123]
+symbol["abc"]
+symbol(123, "abc", foo: true)                       ~~~ RVALUE ONLY ~~~
+symbol#[Void]
+symbol#(Int, String, foo: Bool): Int
+symbol.field
+symbol.field[123]
+symbol.field["abc"]
+symbol.field(123, "abc", foo: true)
+symbol.field#[Void]
+symbol.field#(Int, String, foo: Bool): Int
+symbol.field.inner
+symbol.field[123].inner
+symbol.field["abc"].inner
+symbol.field(123, "abc", foo: true).inner
+symbol.field#[Void].inner
+(symbol.field#(Int, String, foo: Bool): Int).inner
+
+this
+this[123]
+this["abc"]
+this(123, "abc", foo: true)
+this#(Int, String, foo: Bool): Int
+this.field
+
+&symbol
+*symbol
+!symbol
+~symbol
+-symbol
+symbol...

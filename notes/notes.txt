@@ -1,0 +1,158 @@
+Keywords:
+
+  break
+  continue
+
+Syntax:
+
+  @@@
+  > #regex/pattern/flags
+  > #regex!pattern!flags
+  > #regex@pattern@flags
+  > #regex{pattern}flags
+  Regex literal.
+
+  @@@
+  > #parser{pattern}
+  Parser literal.
+
+  Probably a PEG or a packrat parser.
+
+  @@@
+  > alias localSymbol = dotted.other.symbol
+  Creates an alias in the local scope's symbol table.
+
+  No storage, purely syntactic, cannot be altered within the same scope.
+
+  @@@
+  > type MyType: _
+  > const myConstSymbol: _
+  > var mySymbol: _
+  > func myFunction: _
+  > method MyType.myMethod: _
+  Provides an opportunity for attaching pragmas to an existing symbol.
+
+  @@@
+  > type MyType: OtherType
+  Asserts that MyType implements interface OtherType directly
+  -OR- that MyType can be cast to OtherType
+  -OR- that MyType can be cast to some intermediate type that implements interface OtherType.
+
+  Also sets the priority order for casts during func/method overloading: first
+  mention has highest priority.
+
+  @@@
+  > [top-level]
+  > #version(major,minor=0,patch=0)
+  Every exported symbol is actually named "symbolName@major.minor.patch".
+
+  It's okay for multiple files in a module to define the same symbol if they
+  have different versions, or for a single file to define the same symbol
+  multiple times with different per-symbol versions.
+
+  > type MyType: _            #version(major,minor=0,patch=0)
+  > const myConstSymbol: _    #version(major,minor=0,patch=0)
+  > var mySymbol: _           #version(major,minor=0,patch=0)
+  > func myFunction: _        #version(major,minor=0,patch=0)
+  > method MyType.myMethod: _ #version(major,minor=0,patch=0)
+  Overrides the file-wide #version pragma on a symbol-by-symbol basis.
+
+  > import pkgName #version(major,minor=0,patch=0)
+  Resolves "pkgName.symbolName" to "pkgName.symbolName@major.minor.patch".
+  Default is latest.
+
+Built-ins:
+
+  @@@
+  > type Number = ...
+  > type String = ...
+  > type Regex = ...
+  > type Parser = ...
+  Literals.
+
+  @@@
+  > type U8 = ...
+  > type U16 = ...
+  > type U32 = ...
+  > type U64 = ...
+  > type S8 = ...
+  > type S16 = ...
+  > type S32 = ...
+  > type S64 = ...
+  > type F32 = ...
+  > type F64 = ...
+  > type BigInt = ...
+  > type BigRat = ...
+  > type BigFloat = ...
+  > type BigDecimal = ...
+  Built-in numeric types.
+
+  @@@
+  > type Type = interface{ method new(...): Any }
+  > type MyType = ...
+  > var MyAlias: Type = MyType
+  Interface that all types implement.
+
+  "MyAlias" is a type variable that can be reassigned at runtime.
+
+  @@@
+  > type Type[T: type] = interface{ all static methods from T }
+  > type MyType = ...
+  > var MyAlias: Type[MyType] = MyType
+  Interface that a specific type implements.
+
+  "MyAlias" is indistinguishable from "MyType".
+
+  Technically "MyAlias" can be reassigned at runtime, but "MyType" is the only
+  instance of "Type[MyType]" and there is no way to create more implementations.
+
+  @@@
+  > type Void = struct{}
+  Alias for "the type that contains no data".
+
+  @@@
+  > type Any = interface{}
+  Alias for "the type that contains any possible value".
+
+  @@@
+  > type Tuple[] = Void
+  Type overload for a 0-item tuple.
+
+  > type Tuple[A: type] = struct { first: A }
+  Type overload for a 1-item tuple.
+
+  > type Tuple[A: type, B: type] = struct { first: A, second: B }
+  Type overload for a 2-item tuple.
+
+  And so on for up to 9-item tuples.
+
+  @@@
+  > type Producer[T: type] = interface{...}
+  > type Consumer[T: type] = interface{...}
+  > type Iterator[T: type] = interface{...}
+  > type Stack[T: type] = interface{...}
+  > type Queue[T: type] = interface{...}
+  > type Deque[T: type] = interface{...}
+  > type List[T: type] = interface{...}
+  > type DynamicList[T: type] = interface{...}
+  > type Map[K: type, V: type] = interface{...}
+  > type DynamicMap[K: type, V: type] = interface{...}
+  Common datastructure interfaces.
+
+  List[T] and Map[T] are read-only.
+
+  Built-in array and map types implement some of these.
+
+  @@@
+  > func new(T Type): Any
+  > func new[T: type](): *T
+  Allocates memory for an instance of T.
+  The memory is zeroed but otherwise uninitialized.
+
+  For each possible "...", the implicit implementation for "T.new(...)" is:
+  > static method T.new(...): *T {
+  >   pointer := builtin.new[T]()
+  >   pointer.init(...)
+  >   return pointer
+  > }
+

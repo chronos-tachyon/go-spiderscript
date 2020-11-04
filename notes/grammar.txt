@@ -1,0 +1,108 @@
+File          => :shebangLine(<ShebangLine>)? ( <WS> | :statements(<Statement>) )* EOF
+ShebangLine   => '#!' :text((. & !VWS)+) '\n'?
+Statement     => ( <PragmaStatement> |
+                   <ImportStatement> |
+                   <AliasStatement> |
+                   <TypeDeclStatement> |
+                   <VarDeclStatement> |
+                   <FuncDeclStatement> |
+                   <ExpressionStatement> |
+                   <AssignmentStatement> |
+                   <IfStatement> |
+                   <ForStatement> |
+                   <ForEachStatement> |
+                   <WhileStatement> |
+                   <ReturnStatement> )
+
+PragmaStatement   => :pragma(<Pragma>) <HWS>* <EOS> ;
+ImportStatement   => 'import' <HWS>+ :module(<ImportPath>) <HWS>* ( :pragmas(<Pragma>) <HWS>* )* <EOS> ;
+AliasStatement    => 'alias' <HWS>+ :name(<Identifier>) <HWS>* '=' <HWS>* :target(<Symbol>) <HWS>* <EOS> ;
+TypeDeclStatement => 'type' <HWS>+ :name(<Identifier>) <HWS>* '=' <HWS>* :target(<Type>) <HWS>* <EOS> ;
+
+Type          => ( <Symbol> | <Interface> | <Struct> | <Union> | <Enum> | <Bitset> ) ;
+Interface     => 'interface' <HWS>* '{' (...)* '}' ;
+Struct        => 'struct' <HWS>* '{' (...)* '}' ;
+Union         => 'union' <HWS>* '{' (...)* '}' ;
+
+Pragma        => ( <VersionPragma> | <GenericPragma> ) ;
+
+VersionPragma =>  '#version'
+                  <HWS>*
+                  '('
+                  <HWS>*
+                  (
+                    :major(<Number>)
+                    <HWS>*
+                    (
+                      ','
+                      <HWS>*
+                      :minor(<Number>)
+                      <HWS>*
+                      (
+                        ','
+                        <HWS>*
+                        :patch(<Number>)
+                        <HWS>*
+                      )?
+                    )?
+                  )?
+                  ')'
+                  ;
+
+GenericPragma =>  '#'
+                  :name(<Identifier>)
+                  (
+                    <HWS>*
+                    '('
+                    <HWS>*
+                    (
+                      :first(<Value>)
+                      <HWS>*
+                      (
+                        ','
+                        <HWS>*
+                        :rest(<Value>)
+                        <HWS>*
+                      )*
+                      (
+                        ','
+                        <HWS>*
+                      )?
+                    )?
+                    ')'
+                  )?
+                  ;
+
+Expr          => Sum ;
+Sum           => :first(Product) WS* (:operator(Plus | Minus) WS* :rest(Product) WS*)* ;
+Product       => :first(Power) WS* (:operator(Star | Slash) WS* :rest(Power) WS*)* ;
+Power         => :first(Value) WS* (:operator(StarStar) WS* :rest(Power) WS*)? ;
+Value         =>  ( Identifier | Number | String | '(' Expr ')' ) ;
+
+Symbol        =>  :words(<Identifier>) ( '.' :words(<Identifier>) )* ;
+Identifier    =>  :value( [A-Za-z_$] [0-9A-Za-z_$]* ) ;
+
+Number        =>  (
+                    :sign([+-])?
+                    (
+                      '0' :radixSymbol('b') :integralDigits([0-1]+) ( '.' :fractionalDigits([0-1]+) )? |
+                      '0' :radixSymbol('o') :integralDigits([0-7]+) ( '.' :fractionalDigits([0-7]+) )? |
+                      '0' :radixSymbol('x') :integralDigits([0-9A-Fa-f]+) ( '.' :fractionalDigits([0-9A-Fa-f]+) )? |
+                      :integralDigits([0-9]+) ( '.' :fractionalDigits([0-9]+) )?
+                    )
+                    (
+                      :exponentSymbol([EePp])
+                      :exponentSign([+-])?
+                      :exponentDigits([0-9]+)
+                    )?
+                    ;
+
+String        => ( SQString | DQString ) ;
+SQString      => :characters( '\'' ('\\' . | [^\\'])* '\'' ) ;
+DQString      => :characters( '"' ('\\' . | [^\\"])* '"' ) ;
+
+EOS => ( ';' | <VWS> | <EOF> ) ;
+
+WS  => (HWS | VWS) ;
+HWS => [\x09\x20\u00a0\u1680\u2000-\u200b\u202f\u205f\u3000\ufeff] ;
+VWS => [\x0a-\x0d\u0085\u2028-\u2029] ;
