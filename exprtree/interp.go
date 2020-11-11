@@ -84,11 +84,11 @@ func NewInterp(cpu RuntimeCPU, os RuntimeOS) *Interp {
 
 func (interp *Interp) Init(cpu RuntimeCPU, os RuntimeOS) {
 	if cpu == InvalidRuntimeCPU {
-		panic(fmt.Errorf("cpu is %v", cpu))
+		cpu = X86_64
 	}
 
 	if os == InvalidRuntimeOS {
-		panic(fmt.Errorf("os is %v", os))
+		os = LINUX
 	}
 
 	*interp = Interp{

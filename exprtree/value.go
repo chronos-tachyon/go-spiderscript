@@ -5,63 +5,91 @@ import (
 	"math"
 )
 
+// Frame
+// {{{
+
+type Frame struct {
+	values     []Value
+	bySymbol   map[*Symbol]Value
+	byOffset   map[uint]Value
+	alignShift uint8
+	minSize    uint16
+	padSize    uint16
+}
+
+func (frame *Frame) AlignShift() uint {
+	return uint(frame.alignShift)
+}
+
+func (frame *Frame) AlignBytes() uint {
+	return uint(1) << frame.alignShift
+}
+
+func (frame *Frame) MinimumSize() uint {
+	return uint(frame.minSize)
+}
+
+func (frame *Frame) PaddedSize() uint {
+	return uint(frame.padSize)
+}
+
+func (frame *Frame) Values() []Value {
+	return cloneValues(frame.values)
+}
+
+func (frame *Frame) ValueBySymbol(sym *Symbol) (Value, bool) {
+	value, found := frame.bySymbol[sym]
+	return value, found
+}
+
+func (frame *Frame) ValueByOffset(offset uint) (Value, bool) {
+	value, found := frame.byOffset[offset]
+	return value, found
+}
+
+// }}}
+
 // Value
 // {{{
 
 type Value struct {
-	field  *Field
-	memory *Memory
+	sym  *Symbol
+	span MemorySpan
 }
 
-func (value *Value) Interp() *Interp {
-	return value.Field().Interp()
+func (value Value) Symbol() *Symbol {
+	return value.sym
 }
 
-func (value *Value) Symbol() *Symbol {
-	return value.Field().Symbol()
+func (value Value) Interp() *Interp {
+	return value.sym.Interp()
 }
 
-func (value *Value) Field() *Field {
-	return value.field
+func (value Value) CanonicalName() string {
+	return value.sym.CanonicalName()
 }
 
-func (value *Value) Memory() *Memory {
-	return value.memory
+func (value Value) MangledName() string {
+	return value.sym.MangledName()
 }
 
-func (value *Value) CanonicalName() string {
-	return value.Field().CanonicalName()
+func (value Value) Type() *Type {
+	return value.sym.Type()
 }
 
-func (value *Value) MangledName() string {
-	return value.Field().MangledName()
+func (value Value) MemoryView() MemoryView {
+	return value.span
 }
 
-func (value *Value) Type() *Type {
-	return value.Field().Type()
+func (value Value) WithWriteLock(fn func(bytes []byte) error) error {
+	return value.span.AllWithWriteLock(fn)
 }
 
-func (value *Value) Offset() uint {
-	return value.Field().Offset()
+func (value Value) WithReadLock(fn func(bytes []byte) error) error {
+	return value.span.AllWithReadLock(fn)
 }
 
-func (value *Value) Length() uint {
-	return value.Field().Length()
-}
-
-func (value *Value) Bytes() []byte {
-	return value.Memory().Range(value.Offset(), value.Length())
-}
-
-func (value *Value) WithReadLock(fn func(bytes []byte) error) error {
-	return value.Memory().WithReadLock(value.Offset(), value.Length(), fn)
-}
-
-func (value *Value) WithWriteLock(fn func(bytes []byte) error) error {
-	return value.Memory().WithWriteLock(value.Offset(), value.Length(), fn)
-}
-
-func (value *Value) ResetToZero() {
+func (value Value) Clear() {
 	_ = value.WithWriteLock(func(bytes []byte) error {
 		for i := range bytes {
 			bytes[i] = 0
@@ -70,30 +98,24 @@ func (value *Value) ResetToZero() {
 	})
 }
 
-func (value *Value) Walk(to TraversalOrder, fn func(Expr)) {
-	fn(value)
+func (value Value) Construct() {
+	value.Clear()
+	// TODO: call __ctor() if present
 }
 
-func (value *Value) Eval() (*Value, error) {
-	return value, nil
+func (value Value) Destruct() {
+	// TODO: call __dtor() if present
+	value.Clear()
 }
 
-func (value *Value) Construct() {
-	value.ResetToZero()
-}
-
-func (value *Value) Destruct() {
-	value.ResetToZero()
-}
-
-func (value *Value) Get() interface{} {
+func (value Value) Get() interface{} {
 	bo := value.Interp().ByteOrder()
 
 	chased := value.Type().Chase()
 	kind := chased.Kind()
 
 	var out interface{}
-	value.WithReadLock(func(bytes []byte) error {
+	err := value.WithReadLock(func(bytes []byte) error {
 		switch kind {
 		case ReflectedTypeKind:
 			t, _ := value.Interp().TypeByID(TypeID(bo.Uint32(bytes)))
@@ -169,7 +191,7 @@ func (value *Value) Get() interface{} {
 			case S64Kind:
 				s64 = int64(bo.Uint64(bytes))
 			default:
-				panic(fmt.Errorf("BUG: (*Value).Get(): unknown (*Enum).Kind() %v", e.Kind()))
+				panic(fmt.Errorf("BUG: unknown (*Enum).Kind() %v", e.Kind()))
 			}
 
 			out = e.ByNumber(s64)
@@ -188,7 +210,7 @@ func (value *Value) Get() interface{} {
 			case U64Kind:
 				u64 = bo.Uint64(bytes)
 			default:
-				panic(fmt.Errorf("BUG: (*Value).Get(): unknown (*Bitfield).Kind() %v", b.Kind()))
+				panic(fmt.Errorf("BUG: unknown (*Bitfield).Kind() %v", b.Kind()))
 			}
 
 			items := b.Items()
@@ -203,14 +225,15 @@ func (value *Value) Get() interface{} {
 			out = bitset
 
 		default:
-			panic(fmt.Errorf("BUG: (*Value).Get(): Kind %v not implemented", kind))
+			panic(fmt.Errorf("BUG: Kind %v not implemented", kind))
 		}
 		return nil
 	})
+	checkBug(err)
 	return out
 }
 
-func (value *Value) Set(in interface{}) error {
+func (value Value) Set(in interface{}) error {
 	bo := value.Interp().ByteOrder()
 
 	chased := value.Type().Chase()
@@ -289,12 +312,12 @@ func (value *Value) Set(in interface{}) error {
 			case *EnumItem:
 				checkNotNil("*EnumItem", x)
 				if parent := x.Parent(); parent != e {
-					panic(fmt.Errorf("BUG: (*Value).Set(): (*EnumItem).Parent() was %p, expected %p", parent, e))
+					panic(fmt.Errorf("BUG: (*EnumItem).Parent() was %p, expected %p", parent, e))
 				}
 				s64 = x.Number()
 
 			default:
-				panic(fmt.Errorf("BUG: (*Value).Set(): wrong type for argument: expected *EnumItem, got %T", in))
+				return fmt.Errorf("wrong type for argument: expected *EnumItem, got %T", in)
 			}
 
 			switch e.Kind() {
@@ -307,7 +330,7 @@ func (value *Value) Set(in interface{}) error {
 			case U64Kind, S64Kind:
 				bo.PutUint64(bytes, uint64(s64))
 			default:
-				panic(fmt.Errorf("BUG: (*Value).Set(): unknown (*Enum).Kind() %v", e.Kind()))
+				panic(fmt.Errorf("BUG: unknown (*Enum).Kind() %v", e.Kind()))
 			}
 
 		case BitfieldKind:
@@ -325,7 +348,7 @@ func (value *Value) Set(in interface{}) error {
 				for item := range x {
 					checkNotNil("item", item)
 					if parent := item.Parent(); parent != b {
-						panic(fmt.Errorf("BUG: (*Value).Set(): (*BitfieldItem).Parent() was %p, expected %p", parent, b))
+						panic(fmt.Errorf("BUG: (*BitfieldItem).Parent() was %p, expected %p", parent, b))
 					}
 					u64 |= item.Bit()
 				}
@@ -334,13 +357,13 @@ func (value *Value) Set(in interface{}) error {
 				for _, item := range x {
 					checkNotNil("item", item)
 					if parent := item.Parent(); parent != b {
-						panic(fmt.Errorf("BUG: (*Value).Set(): (*BitfieldItem).Parent() was %p, expected %p", parent, b))
+						panic(fmt.Errorf("BUG: (*BitfieldItem).Parent() was %p, expected %p", parent, b))
 					}
 					u64 |= item.Bit()
 				}
 
 			default:
-				panic(fmt.Errorf("BUG: (*Value).Set(): wrong type for argument: expected map[*BitfieldItem]struct{}, got %T", in))
+				return fmt.Errorf("wrong type for argument: expected map[*BitfieldItem]struct{}, got %T", in)
 			}
 
 			switch b.Kind() {
@@ -353,11 +376,11 @@ func (value *Value) Set(in interface{}) error {
 			case U64Kind:
 				bo.PutUint64(bytes, u64)
 			default:
-				panic(fmt.Errorf("BUG: (*Value).Set(): unknown (*Bitfield).Kind() %v", b.Kind()))
+				panic(fmt.Errorf("BUG: unknown (*Bitfield).Kind() %v", b.Kind()))
 			}
 
 		default:
-			panic(fmt.Errorf("BUG: (*Value).Set(): Kind %v not implemented", kind))
+			panic(fmt.Errorf("BUG: Kind %v not implemented", kind))
 		}
 		return nil
 	})

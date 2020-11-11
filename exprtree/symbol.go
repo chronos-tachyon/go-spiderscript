@@ -413,6 +413,33 @@ func (symtab *SymbolTable) NewSymbol(data SymbolData) (*Symbol, error) {
 	return sym, nil
 }
 
+func (symtab *SymbolTable) NewGenSym(t *Type) *Symbol {
+	checkNotNil("t", t)
+
+	symID := symtab.interp.allocateSymbol()
+	symName := fmt.Sprintf("__G%08x", uint32(symID))
+	sym := &Symbol{
+		symtab:   symtab,
+		id:       symID,
+		kind:     SimpleSymbol,
+		hname:    symName,
+		lname:    symName,
+		cname:    symName,
+		mname:    symName,
+		generic:  nil,
+		function: nil,
+		type_:    t,
+		ctv:      nil,
+	}
+	symtab.interp.registerSymbol(sym)
+
+	if err := symtab.Put(sym.LocalName(), sym); err != nil {
+		panic(fmt.Errorf("BUG: %w", err))
+	}
+
+	return sym
+}
+
 var _ Resolver = (*SymbolTable)(nil)
 
 // }}}

@@ -3,6 +3,5 @@
 package exprtree
 
 func SystemCPU() RuntimeCPU {
-	// fall back on X86_64
-	return X86_64
+	return 0
 }

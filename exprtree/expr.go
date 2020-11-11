@@ -7,7 +7,7 @@ type Expr interface {
 	Interp() *Interp
 	Type() *Type
 	Walk(to TraversalOrder, fn func(Expr))
-	Eval() (*Value, error)
+	EvalInto(out *Value) error
 }
 
 // }}}

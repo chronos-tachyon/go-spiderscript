@@ -49,15 +49,24 @@ func giveBuffer(buffer *strings.Builder) {
 	gBufferPool.Put(buffer)
 }
 
+func checkBug(err error) {
+	if err != nil {
+		panic(fmt.Errorf("BUG: %w", err))
+	}
+}
+
 func checkNotNil(name string, ptr interface{}) {
 	if reflect.ValueOf(ptr).IsNil() {
 		panic(fmt.Errorf("BUG: %s is nil", name))
 	}
 }
 
-func checkBug(err error) {
-	if err != nil {
-		panic(fmt.Errorf("BUG: %w", err))
+func checkIJ(i uint, j uint, size uint) {
+	if i > j {
+		panic(fmt.Errorf("BUG: i > j; i=%d, j=%d", i, j))
+	}
+	if j > size {
+		panic(fmt.Errorf("BUG: j > size; j=%d, size=%d", j, size))
 	}
 }
 
@@ -117,81 +126,73 @@ func writeNameTo(buf *strings.Builder, name string) {
 
 func cloneAnys(in []interface{}) []interface{} {
 	out := make([]interface{}, len(in))
-	for index, row := range in {
-		out[index] = row
-	}
+	copy(out, in)
 	return out
 }
 
 func cloneStrings(in []string) []string {
 	out := make([]string, len(in))
-	for index, row := range in {
-		out[index] = row
-	}
+	copy(out, in)
 	return out
 }
 
 func cloneTypes(in []*Type) []*Type {
 	out := make([]*Type, len(in))
-	for index, row := range in {
-		out[index] = row
-	}
+	copy(out, in)
 	return out
 }
 
 func cloneGenericParams(in []GenericParam) []GenericParam {
 	out := make([]GenericParam, len(in))
-	for index, row := range in {
-		out[index] = row
-	}
+	copy(out, in)
 	return out
 }
 
 func cloneFunctionArgs(in []FunctionArg) []FunctionArg {
 	out := make([]FunctionArg, len(in))
-	for index, row := range in {
-		out[index] = row
-	}
+	copy(out, in)
 	return out
 }
 
-func cloneFields(in []*Field) []*Field {
-	out := make([]*Field, len(in))
-	for index, row := range in {
-		out[index] = row
-	}
+func cloneFields(in []Field) []Field {
+	out := make([]Field, len(in))
+	copy(out, in)
+	return out
+}
+
+func cloneValues(in []Value) []Value {
+	out := make([]Value, len(in))
+	copy(out, in)
 	return out
 }
 
 func cloneEnumItems(in []*EnumItem) []*EnumItem {
 	out := make([]*EnumItem, len(in))
-	for index, row := range in {
-		out[index] = row
-	}
+	copy(out, in)
 	return out
 }
 
 func cloneBitfieldItems(in []*BitfieldItem) []*BitfieldItem {
 	out := make([]*BitfieldItem, len(in))
-	for index, row := range in {
-		out[index] = row
-	}
+	copy(out, in)
 	return out
 }
 
 func cloneStructFields(in []*StructField) []*StructField {
 	out := make([]*StructField, len(in))
-	for index, row := range in {
-		out[index] = row
-	}
+	copy(out, in)
 	return out
 }
 
 func cloneUnionFields(in []*UnionField) []*UnionField {
 	out := make([]*UnionField, len(in))
-	for index, row := range in {
-		out[index] = row
-	}
+	copy(out, in)
+	return out
+}
+
+func cloneStackTrace(in StackTrace) StackTrace {
+	out := make(StackTrace, len(in))
+	copy(out, in)
 	return out
 }
 
@@ -199,14 +200,6 @@ func cloneFunctionArgMap(in map[string]FunctionArg) map[string]FunctionArg {
 	out := make(map[string]FunctionArg, len(in))
 	for key, value := range in {
 		out[key] = value
-	}
-	return out
-}
-
-func cloneStackTrace(in StackTrace) StackTrace {
-	out := make(StackTrace, len(in))
-	for index, row := range in {
-		out[index] = row
 	}
 	return out
 }
