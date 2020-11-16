@@ -3,6 +3,8 @@ package exprtree
 import (
 	"fmt"
 	"math"
+
+	"github.com/chronos-tachyon/go-spiderscript/memory"
 )
 
 // Frame
@@ -54,11 +56,15 @@ func (frame *Frame) ValueByOffset(offset uint) (Value, bool) {
 
 type Value struct {
 	sym  *Symbol
-	span MemorySpan
+	span memory.UInt8Span
 }
 
 func (value Value) Symbol() *Symbol {
 	return value.sym
+}
+
+func (value Value) UInt8Span() memory.UInt8Span {
+	return value.span
 }
 
 func (value Value) Interp() *Interp {
@@ -77,10 +83,6 @@ func (value Value) Type() *Type {
 	return value.sym.Type()
 }
 
-func (value Value) MemoryView() MemoryView {
-	return value.span
-}
-
 func (value Value) WithWriteLock(fn func(bytes []byte) error) error {
 	return value.span.AllWithWriteLock(fn)
 }
@@ -89,23 +91,18 @@ func (value Value) WithReadLock(fn func(bytes []byte) error) error {
 	return value.span.AllWithReadLock(fn)
 }
 
-func (value Value) Clear() {
-	_ = value.WithWriteLock(func(bytes []byte) error {
-		for i := range bytes {
-			bytes[i] = 0
-		}
-		return nil
-	})
+func (value Value) Zero() {
+	value.span.Zero()
 }
 
 func (value Value) Construct() {
-	value.Clear()
+	value.Zero()
 	// TODO: call __ctor() if present
 }
 
 func (value Value) Destruct() {
 	// TODO: call __dtor() if present
-	value.Clear()
+	value.Zero()
 }
 
 func (value Value) Get() interface{} {

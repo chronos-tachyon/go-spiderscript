@@ -1,6 +1,6 @@
 // +build linux
 
-package exprtree
+package memory
 
 import (
 	"fmt"
@@ -24,7 +24,18 @@ func (mode HugePagesMode) mmapFlags() uintptr {
 	case HugePages1G:
 		return syscall.MAP_HUGETLB | _MAP_HUGE_1GB
 	default:
-		return (1 << 12)
+		return 0
+	}
+}
+
+func (mode HugePagesMode) mmapFlagNames() string {
+	switch mode {
+	case HugePages2M:
+		return "|MAP_HUGETLB|MAP_HUGE_2MB"
+	case HugePages1G:
+		return "|MAP_HUGETLB|MAP_HUGE_1GB"
+	default:
+		return ""
 	}
 }
 
@@ -57,15 +68,19 @@ func malloc(slice *[]byte, length uint, hugePages HugePagesMode, isLocked bool) 
 		var (
 			oldAddr uintptr = 0
 			prot    uintptr = syscall.PROT_READ | syscall.PROT_WRITE
-			flags0  uintptr = syscall.MAP_PRIVATE | syscall.MAP_ANONYMOUS | hugePages.mmapFlags()
+			flags   uintptr = syscall.MAP_PRIVATE | syscall.MAP_ANONYMOUS | hugePages.mmapFlags()
 			fd      uintptr = ^uintptr(0)
 			offset  uintptr = 0
 		)
 
-		newAddr, _, errno = syscall.Syscall6(syscall.SYS_MMAP, oldAddr, newSize, prot, flags0, fd, offset)
+		newAddr, _, errno = syscall.Syscall6(syscall.SYS_MMAP, oldAddr, newSize, prot, flags, fd, offset)
+		if errno == syscall.ENOMEM {
+			flags = syscall.MAP_PRIVATE | syscall.MAP_ANONYMOUS
+			newAddr, _, errno = syscall.Syscall6(syscall.SYS_MMAP, oldAddr, newSize, prot, flags, fd, offset)
+		}
 		if errno != 0 {
 			err := &os.SyscallError{Syscall: "mmap", Err: errno}
-			panic(fmt.Errorf("mmap(NULL, %#x, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) failed: %w", newSize, err))
+			panic(fmt.Errorf("mmap(NULL, %#x, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS%s, -1, 0) failed: %w", newSize, hugePages.mmapFlagNames(), err))
 		}
 
 	case newSize == 0:
@@ -79,8 +94,8 @@ func malloc(slice *[]byte, length uint, hugePages HugePagesMode, isLocked bool) 
 		newAddr = oldAddr
 
 	default:
-		var flags1 uintptr = _MREMAP_MAYMOVE
-		newAddr, _, errno = syscall.Syscall6(syscall.SYS_MREMAP, oldAddr, oldSize, newSize, flags1, 0, 0)
+		var flags uintptr = _MREMAP_MAYMOVE
+		newAddr, _, errno = syscall.Syscall6(syscall.SYS_MREMAP, oldAddr, oldSize, newSize, flags, 0, 0)
 		if errno != 0 {
 			err := &os.SyscallError{Syscall: "mremap", Err: errno}
 			panic(fmt.Errorf("mremap(%#x, %#x, %#x, MREMAP_MAYMOVE) failed: %w", oldAddr, oldSize, newSize, err))

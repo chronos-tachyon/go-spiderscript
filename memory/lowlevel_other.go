@@ -1,6 +1,6 @@
 // +build !linux
 
-package exprtree
+package memory
 
 import (
 	"fmt"
