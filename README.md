@@ -1,2 +1,2 @@
 # go-spiderscript
-[WIP] Interpreter in Golang for new experimental langauge, SpiderScript
+[WIP] Interpreter in Golang for new experimental language, SpiderScript
